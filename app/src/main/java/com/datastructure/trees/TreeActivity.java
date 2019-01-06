@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,14 +16,15 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
 import de.blox.graphview.BaseGraphAdapter;
 import de.blox.graphview.Edge;
 import de.blox.graphview.Graph;
-import de.blox.graphview.Node;
 import de.blox.graphview.tree.BuchheimWalkerAlgorithm;
 import de.blox.graphview.tree.BuchheimWalkerConfiguration;
 
@@ -34,6 +34,7 @@ public class TreeActivity extends AppCompatActivity {
     private Graph graph;
     private BinaryTree binaryTree;
     private TextView tvValue;
+    private TextView sequence;
     private WorkaroundGraphView graphView;
     private Button btnSubmitValue;
     private ArrayList<Button> numericKeypad;
@@ -41,6 +42,7 @@ public class TreeActivity extends AppCompatActivity {
     private View viewNumericKeypad;
     private RelativeLayout rlNumericKeypad;
     private LinearLayout llAddTree;
+    private String sequenceString = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,21 +53,11 @@ public class TreeActivity extends AppCompatActivity {
         initialize();
         initializeClickListener();
 
-        if (graph.getNodeCount() > 0){
+        if (graph.getNodeCount() > 0) {
             graphView.setVisibility(View.INVISIBLE);
             llAddTree.setVisibility(View.VISIBLE);
         }
 
-        /*binaryTree.insert(35);
-        binaryTree.insert(23);
-        binaryTree.insert(232);
-        binaryTree.insert(23240);
-        binaryTree.insert(240);
-        binaryTree.insert(239);
-        binaryTree.insert(200);*/
-
-
-        // you can set the graph via the constructor or use the adapter.setGraph(Graph) method
         final BaseGraphAdapter<ViewHolder> adapter = new BaseGraphAdapter<ViewHolder>(this, R.layout.node, graph) {
             @NonNull
             @Override
@@ -80,7 +72,6 @@ public class TreeActivity extends AppCompatActivity {
         };
         graphView.setAdapter(adapter);
 
-        // set the algorithm here
         final BuchheimWalkerConfiguration configuration = new BuchheimWalkerConfiguration.Builder()
                 .setSiblingSeparation(100)
                 .setLevelSeparation(300)
@@ -90,7 +81,7 @@ public class TreeActivity extends AppCompatActivity {
         adapter.setAlgorithm(new BuchheimWalkerAlgorithm(configuration));
 
         List<Edge> a = graph.getEdges();
-        for (Edge e: a){
+        for (Edge e : a) {
             Log.d("insertData", "insertData: " + e.toString());
         }
     }
@@ -113,7 +104,7 @@ public class TreeActivity extends AppCompatActivity {
     public void onBackPressed() {
 
         if (viewNumericKeypad.getVisibility() == View.VISIBLE &&
-                rlNumericKeypad.getVisibility() == View.VISIBLE){
+                rlNumericKeypad.getVisibility() == View.VISIBLE) {
             viewNumericKeypad.setVisibility(View.GONE);
             rlNumericKeypad.setVisibility(View.GONE);
         } else {
@@ -131,15 +122,16 @@ public class TreeActivity extends AppCompatActivity {
         }
     }
 
-    private void initialize(){
+    private void initialize() {
         llAddTree = findViewById(R.id.ll_add_tree);
         addTree = findViewById(R.id.add_tree);
         tvValue = findViewById(R.id.tv_value);
+        sequence = findViewById(R.id.sequence);
         graph = new Graph();
         binaryTree = new BinaryTree();
         graphView = findViewById(R.id.graph);
         btnSubmitValue = findViewById(R.id.btn_submitvalue);
-        numericKeypad = new ArrayList<Button>(){{
+        numericKeypad = new ArrayList<Button>() {{
             add((Button) findViewById(R.id.btn_1));
             add((Button) findViewById(R.id.btn_2));
             add((Button) findViewById(R.id.btn_3));
@@ -159,12 +151,12 @@ public class TreeActivity extends AppCompatActivity {
         ivDelete = findViewById(R.id.iv_delete);
     }
 
-    private void initializeClickListener(){
+    private void initializeClickListener() {
         addTree.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (viewNumericKeypad.getVisibility() == View.GONE &&
-                        rlNumericKeypad.getVisibility() == View.GONE){
+                        rlNumericKeypad.getVisibility() == View.GONE) {
                     viewNumericKeypad.setVisibility(View.VISIBLE);
                     rlNumericKeypad.setVisibility(View.VISIBLE);
                 }
@@ -174,7 +166,7 @@ public class TreeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (viewNumericKeypad.getVisibility() == View.GONE &&
-                        rlNumericKeypad.getVisibility() == View.GONE){
+                        rlNumericKeypad.getVisibility() == View.GONE) {
                     viewNumericKeypad.setVisibility(View.VISIBLE);
                     rlNumericKeypad.setVisibility(View.VISIBLE);
                 } else {
@@ -183,45 +175,67 @@ public class TreeActivity extends AppCompatActivity {
                 }
             }
         });
-        for (final Button btn: numericKeypad){
+        for (final Button btn : numericKeypad) {
             btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (tvValue.getText().length() < 6){
+                    if (tvValue.getText().length() < 6) {
                         String text = tvValue.getText() + "" + btn.getText();
                         tvValue.setText(text);
                     }
                 }
             });
         }
+        sequence.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String s = sequence.getText().toString();
+                if (s.isEmpty()) return;
+                if (!s.contains(",")) sequence.setText("");
+                else {
+                    sequence.setText(s.substring(0, s.lastIndexOf(",")));
+                }
+            }
+        });
         ivFeed.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (addTree.getVisibility() == View.VISIBLE){
+                /*if (addTree.getVisibility() == View.VISIBLE) {
                     llAddTree.setVisibility(View.GONE);
                     graphView.setVisibility(View.VISIBLE);
+                }*/
+                sequence.setVisibility(View.VISIBLE);
+                if (!tvValue.getText().toString().isEmpty()) {
+                    if (sequence.getText().toString().isEmpty()) {
+                        sequenceString = tvValue.getText().toString();
+                        sequence.setText(sequenceString);
+                    } else {
+                        sequenceString = sequence.getText().toString() + ", " + tvValue.getText().toString();
+                        sequence.setText(sequenceString);
+                    }
+                    tvValue.setText("");
+                    sequence.setVisibility(View.VISIBLE);
                 }
-                insertGraphNode();
             }
         });
         btnSubmitValue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (addTree.getVisibility() == View.VISIBLE){
+                if (addTree.getVisibility() == View.VISIBLE) {
                     llAddTree.setVisibility(View.GONE);
                     graphView.setVisibility(View.VISIBLE);
                 }
                 viewNumericKeypad.setVisibility(View.GONE);
                 rlNumericKeypad.setVisibility(View.GONE);
-                insertGraphNode();
+                insertGraphNode(sequence.getText().toString().split(","));
             }
         });
         ivBackSpace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (tvValue.getText().length() > 0){
+                if (tvValue.getText().length() > 0) {
                     StringBuilder text = new StringBuilder(tvValue.getText().toString());
-                    text.deleteCharAt(text.length()-1);
+                    text.deleteCharAt(text.length() - 1);
                     tvValue.setText(text.toString());
                 }
             }
@@ -235,7 +249,7 @@ public class TreeActivity extends AppCompatActivity {
         ivDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (graph.getNodeCount() > 0){
+                if (graph.getNodeCount() > 0) {
                     binaryTree.alpha = null;
                     graph.removeNode(graph.getNodes().get(0));
                     graphView.setVisibility(View.INVISIBLE);
@@ -245,11 +259,15 @@ public class TreeActivity extends AppCompatActivity {
         });
     }
 
-    private void insertGraphNode(){
-        try{
-            binaryTree.insert(Integer.parseInt(tvValue.getText().toString()));
+    private void insertGraphNode(String... values) {
+        try {
+            for (String value: values){
+                binaryTree.insert(Integer.parseInt(value.trim()));
+            }
             tvValue.setText(null);
-        } catch (Exception e){
+            sequence.setText(null);
+            sequence.setVisibility(View.GONE);
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -262,25 +280,25 @@ public class TreeActivity extends AppCompatActivity {
         private int treeSize = 0;
         private boolean isUpperLevel = true;
 
-        public void insert(int data){
+        public void insert(int data) {
             alpha = insertData(alpha, data);
             Toast.makeText(TreeActivity.this, "Inserted !", Toast.LENGTH_SHORT).show();
 
         }
 
-        public void preOrder(){
+        public void preOrder() {
             traversePreOrder(alpha);
         }
 
-        public void postOrder(){
+        public void postOrder() {
             traversePostOrder(alpha);
         }
 
-        public void inOrder(){
+        public void inOrder() {
             traverseInOrder(alpha);
         }
 
-        public HashMap<Integer, ArrayList<Node>> breadthFirstTraversal(){
+        public HashMap<Integer, ArrayList<Node>> breadthFirstTraversal() {
             return getLevels(alpha);
         }
 
@@ -288,8 +306,8 @@ public class TreeActivity extends AppCompatActivity {
             return treeSize;
         }
 
-        private Node insertData(Node kNode, int data){
-            if (kNode == null){
+        private Node insertData(Node kNode, int data) {
+            if (kNode == null) {
                 Node tNode = new Node(data, null, null);
                 if (alpha != null && beta != null) {
                     graph.addEdge(new de.blox.graphview.Node(beta.value + ""),
@@ -312,7 +330,7 @@ public class TreeActivity extends AppCompatActivity {
                 treeSize++;
                 return tNode;
             }
-            if (kNode.value >= data){
+            if (kNode.value >= data) {
                 beta = kNode;
                 kNode.leftLink = insertData(kNode.leftLink, data);
             } else {
@@ -330,16 +348,16 @@ public class TreeActivity extends AppCompatActivity {
             }
         }
 
-        private void traversePostOrder(Node kNode){
-            if (kNode != null){
+        private void traversePostOrder(Node kNode) {
+            if (kNode != null) {
                 traversePostOrder(kNode.leftLink);
                 traversePostOrder(kNode.rightLink);
                 System.out.print(kNode.value + " ");
             }
         }
 
-        private void traverseInOrder(Node kNode){
-            if (kNode != null){
+        private void traverseInOrder(Node kNode) {
+            if (kNode != null) {
                 traverseInOrder(kNode.leftLink);
                 System.out.print(kNode.value + " ");
                 traverseInOrder(kNode.rightLink);
@@ -350,12 +368,14 @@ public class TreeActivity extends AppCompatActivity {
             isUpperLevel = true;
             HashMap<Integer, ArrayList<Node>> levelsMap = new HashMap<>();
             int level = 0;
-            if (kNode != null){
-                ArrayList<Node> parentList = new ArrayList<Node>(){{add(alpha);}};
+            if (kNode != null) {
+                ArrayList<Node> parentList = new ArrayList<Node>() {{
+                    add(alpha);
+                }};
                 ArrayList<Node> childList = new ArrayList<>();
-                while(isUpperLevel){
+                while (isUpperLevel) {
                     ArrayList<Node> elements = getChildNodes(parentList, childList);
-                    if (!elements.isEmpty()){
+                    if (!elements.isEmpty()) {
                         levelsMap.put(level++, elements);
                         parentList = new ArrayList<>(childList);
                         childList.clear();
@@ -365,9 +385,9 @@ public class TreeActivity extends AppCompatActivity {
             return levelsMap;
         }
 
-        private ArrayList<Node> getChildNodes(ArrayList<Node> parentList, ArrayList<Node> childList){
+        private ArrayList<Node> getChildNodes(ArrayList<Node> parentList, ArrayList<Node> childList) {
             ArrayList<Node> nodes = new ArrayList<>();
-            for (Node parentNode: parentList){
+            for (Node parentNode : parentList) {
                 nodes.add(parentNode);
                 if (parentNode.leftLink != null) childList.add(parentNode.leftLink);
                 if (parentNode.rightLink != null) childList.add(parentNode.rightLink);
@@ -376,7 +396,7 @@ public class TreeActivity extends AppCompatActivity {
             return nodes;
         }
 
-        public class Node{
+        public class Node {
             int value;
             Node leftLink;
             Node rightLink;
