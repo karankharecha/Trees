@@ -282,8 +282,7 @@ public class TreeActivity extends AppCompatActivity {
 
         public void insert(int data) {
             alpha = insertData(alpha, data);
-            Toast.makeText(TreeActivity.this, "Inserted !", Toast.LENGTH_SHORT).show();
-
+//            Toast.makeText(TreeActivity.this, "Inserted !", Toast.LENGTH_SHORT).show();
         }
 
         public void preOrder() {
